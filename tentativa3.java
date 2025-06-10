@@ -1,10 +1,11 @@
-package Agencia;
+package agencia;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.table.*;
@@ -1289,6 +1290,11 @@ public class AgenciaGUI extends JFrame {
         public String toString() {
             return nome + " (" + getIdentificacao() + ")";
         }
+
+		public String getResumo() {
+			// TODO Auto-generated method stub
+			return null;
+		}
     }
 
     static class ClienteNacional extends Cliente {
