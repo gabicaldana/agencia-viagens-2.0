@@ -198,4 +198,50 @@ public class ClientesFrame extends JFrame {
                     partes[0].isEmpty() || 
                     !partes[1].contains(".") ||
                     partes[1].indexOf(".") == 0 ||
-                    partes[1].
+                    partes[1].endsWith(".")) {
+                    erros.append("- Email inválido. Use o formato: nome@dominio.com\n");
+                }
+            }
+
+            // Valida documentos
+            if (!documento.isEmpty()) {
+                if (tipo.equals("NACIONAL") && !documento.matches("\\d{11}")) {
+                    erros.append("- CPF deve conter 11 dígitos\n");
+                }
+                if (tipo.equals("ESTRANGEIRO") && documento.length() < 5) {
+                    erros.append("- Passaporte deve ter pelo menos 5 caracteres\n");
+                }
+            }
+
+            // Se houver erros, mostra mensagem
+            if (erros.length() > 0) {
+                JOptionPane.showMessageDialog(dialog, 
+                    "Corrija os seguintes erros:\n\n" + erros.toString(), 
+                    "Erros no Formulário", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Se passou nas validações, prossegue com o salvamento
+            if (isEdit) {
+                cliente.setNome(nome);
+                cliente.setTelefone(telefone);
+                cliente.setEmail(email);
+                cliente.setDocumento(documento);
+                controller.atualizarCliente(cliente);
+            } else {
+                Cliente novoCliente = new Cliente(0, nome, telefone, email, tipo, documento);
+                controller.salvarCliente(novoCliente);
+            }
+            
+            atualizarTabela();
+            dialog.dispose();
+        });
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        buttonPanel.add(btnSalvar); 
+        
+        dialog.add(formPanel, BorderLayout.CENTER);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+        dialog.setVisible(true);
+    }
+}
