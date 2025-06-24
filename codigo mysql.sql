@@ -1,7 +1,7 @@
 CREATE DATABASE IF NOT EXISTS agencia_viagens;
 USE agencia_viagens;
 
--- Tabela de clientes (ajustada para os tipos específicos do Java)
+-- Tabela de clientes 
 CREATE TABLE IF NOT EXISTS clientes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     tipo ENUM('NACIONAL', 'ESTRANGEIRO') NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS clientes (
     passaporte VARCHAR(20)
 );
 
--- Tabela de pacotes (com tipos específicos do Java)
+-- Tabela de pacotes 
 CREATE TABLE IF NOT EXISTS pacotes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS pacotes (
     tipo ENUM('Aventura', 'Luxo', 'Cultural') NOT NULL
 );
 
--- Tabela de serviços
+-- Tabela de serviços 
 CREATE TABLE IF NOT EXISTS servicos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     descricao VARCHAR(100) NOT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS pedido_servicos (
     FOREIGN KEY (servico_id) REFERENCES servicos(id) ON DELETE CASCADE
 );
 
--- Adicionando índices para melhorar performance
+-- Índices
 CREATE INDEX idx_cliente_tipo ON clientes(tipo);
 CREATE INDEX idx_pacote_tipo ON pacotes(tipo);
 CREATE INDEX idx_pedido_data ON pedidos(data_pedido);
