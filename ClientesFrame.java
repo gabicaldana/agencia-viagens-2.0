@@ -29,7 +29,7 @@ public class ClientesFrame extends JFrame {
             new EmptyBorder(15, 15, 15, 15),
             new MatteBorder(1, 1, 1, 1, new Color(0x3f51b5)) // Linha de fora
         ));
-        mainPanel.setBackground(new Color(0xDDA0DD));
+        mainPanel.setBackground(new Color(0xf5f5f5));
 
         // Título da janela
         JLabel titleLabel = new JLabel("Gerenciamento de Clientes");
@@ -59,12 +59,12 @@ public class ClientesFrame extends JFrame {
         // Painel de botões com estilo
         JPanel botoesPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         botoesPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
-        botoesPanel.setBackground(new Color(0xDDA0DD));
+        botoesPanel.setBackground(new Color(0xf5f5f5));
         
-        JButton btnAdicionar = criarBotaoEstilizado("Adicionar", new Color(0xEEE8AA));
-        JButton btnEditar = criarBotaoEstilizado("Editar", new Color(0xFFFACD));
-        JButton btnExcluir = criarBotaoEstilizado("Excluir", new Color(0xFA8072));
-        JButton btnAtualizar = criarBotaoEstilizado("Atualizar", new Color(0xE0FFFF));
+        JButton btnAdicionar = criarBotaoEstilizado("Adicionar", new Color(0x4caf50));
+        JButton btnEditar = criarBotaoEstilizado("Editar", new Color(0x2196f3));
+        JButton btnExcluir = criarBotaoEstilizado("Excluir", new Color(0xf44336));
+        JButton btnAtualizar = criarBotaoEstilizado("Atualizar", new Color(0x607d8b));
         
         botoesPanel.add(btnAdicionar);
         botoesPanel.add(btnEditar);
