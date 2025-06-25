@@ -1,0 +1,151 @@
+package agencia.view;
+
+import agencia.controller.DadosController;
+import agencia.model.*;
+import javax.swing.*;
+import javax.swing.border.*;
+import java.awt.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.List;
+
+public class RelatoriosFrame extends JFrame {
+    private final DadosController controller;
+    private final JTextArea textArea = new JTextArea();
+
+    public RelatoriosFrame(DadosController controller) {
+        this.controller = controller;
+        initComponents();
+    }
+
+    private void initComponents() {
+        setTitle("Relatórios");
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBorder(new CompoundBorder(
+            new EmptyBorder(15, 15, 15, 15),
+            new MatteBorder(1, 1, 1, 1, new Color(0x3f51b5))
+        ));
+        mainPanel.setBackground(new Color(0xf5f5f5));
+
+        // Título da janela
+        JLabel titleLabel = new JLabel("Relatórios da Agência");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        titleLabel.setForeground(new Color(0x3f51b5));
+        titleLabel.setBorder(new EmptyBorder(0, 0, 15, 0));
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        mainPanel.add(titleLabel, BorderLayout.NORTH);
+
+        // Configuração da textArea
+        textArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        textArea.setEditable(false);
+        textArea.setMargin(new Insets(10, 10, 10, 10));
+        textArea.setBackground(Color.WHITE);
+        
+        // Painel da área de texto com borda
+        JPanel textPanel = new JPanel(new BorderLayout());
+        textPanel.setBorder(new CompoundBorder(
+            new MatteBorder(1, 1, 1, 1, new Color(0xe0e0e0)),
+            new EmptyBorder(5, 5, 5, 5)
+        ));
+        textPanel.setBackground(Color.WHITE);
+        textPanel.add(new JScrollPane(textArea), BorderLayout.CENTER);
+        mainPanel.add(textPanel, BorderLayout.CENTER);
+
+        // Painel de botões
+        JPanel botoesPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        botoesPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
+        botoesPanel.setBackground(new Color(0xf5f5f5));
+        
+        JButton btnResumo = criarBotaoEstilizado("Resumo Geral", new Color(0x2196f3));
+        JButton btnVendas = criarBotaoEstilizado("Vendas por Data", new Color(0x4caf50));
+        JButton btnPacotesPopulares = criarBotaoEstilizado("Pacotes Populares", new Color(0xff9800));
+        
+        botoesPanel.add(btnResumo);
+        botoesPanel.add(btnVendas);
+        botoesPanel.add(btnPacotesPopulares);
+        
+        mainPanel.add(botoesPanel, BorderLayout.SOUTH);
+
+        btnResumo.addActionListener(e -> gerarResumoGeral());
+        btnVendas.addActionListener(e -> gerarVendasPorData());
+        btnPacotesPopulares.addActionListener(e -> gerarPacotesPopulares());
+
+        setContentPane(mainPanel);
+        pack();
+        setLocationRelativeTo(null);
+    }
+
+    private JButton criarBotaoEstilizado(String texto, Color cor) {
+        JButton botao = new JButton(texto);
+        botao.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        botao.setBackground(cor);
+        botao.setForeground(Color.WHITE);
+        botao.setFocusPainted(false);
+        botao.setBorder(new CompoundBorder(
+            new MatteBorder(1, 1, 2, 1, cor.darker()),
+            new EmptyBorder(5, 15, 5, 15)
+        ));
+        return botao;
+    }
+
+    private void gerarResumoGeral() {
+        List<Cliente> clientes = controller.carregarClientes();
+        List<PacoteViagem> pacotes = controller.carregarPacotes();
+        List<ServicoAdicional> servicos = controller.carregarServicos();
+        List<Pedido> pedidos = controller.carregarPedidos();
+
+        double faturamentoTotal = pedidos.stream().mapToDouble(Pedido::getTotal).sum();
+
+        StringBuilder sb = new StringBuilder("=== RESUMO GERAL ===\n\n");
+        sb.append(String.format("%-25s %d\n", "Total de Clientes:", clientes.size()));
+        sb.append(String.format("%-25s %d\n", "Total de Pacotes:", pacotes.size()));
+        sb.append(String.format("%-25s %d\n", "Total de Serviços:", servicos.size()));
+        sb.append(String.format("%-25s %d\n\n", "Total de Pedidos:", pedidos.size()));
+        sb.append("----------------------------------------\n");
+        sb.append(String.format("%-25s R$ %.2f\n", "FATURAMENTO TOTAL:", faturamentoTotal));
+        
+        textArea.setText(sb.toString());
+    }
+
+    private void gerarVendasPorData() {
+        List<Pedido> pedidos = controller.carregarPedidos();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        Map<String, Double> vendasPorData = new TreeMap<>();
+
+        for (Pedido p : pedidos) {
+            String data = sdf.format(p.getData());
+            vendasPorData.put(data, vendasPorData.getOrDefault(data, 0.0) + p.getTotal());
+        }
+        
+        StringBuilder sb = new StringBuilder("=== VENDAS POR DATA ===\n\n");
+        for (Map.Entry<String, Double> entry : vendasPorData.entrySet()) {
+            sb.append(String.format("%-12s R$ %.2f\n", entry.getKey() + ":", entry.getValue()));
+        }
+
+        textArea.setText(sb.toString());
+    }
+
+    private void gerarPacotesPopulares() {
+        List<Pedido> pedidos = controller.carregarPedidos();
+        Map<String, Integer> contagemPacotes = new HashMap<>();
+
+        for (Pedido p : pedidos) {
+            for (PacoteViagem pacote : p.getPacotes()) {
+                String nomePacote = pacote.getNome();
+                contagemPacotes.put(nomePacote, contagemPacotes.getOrDefault(nomePacote, 0) + 1);
+            }
+        }
+
+        List<Map.Entry<String, Integer>> lista = new ArrayList<>(contagemPacotes.entrySet());
+        lista.sort((a, b) -> b.getValue().compareTo(a.getValue()));
+
+        StringBuilder sb = new StringBuilder("=== PACOTES MAIS VENDIDOS ===\n\n");
+        for (Map.Entry<String, Integer> entry : lista) {
+            sb.append(String.format("%-30s %d venda(s)\n", entry.getKey() + ":", entry.getValue()));
+        }
+
+        textArea.setText(sb.toString());
+    }
+}
