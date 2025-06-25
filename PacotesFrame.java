@@ -38,7 +38,7 @@ public class PacotesFrame extends JFrame {
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         mainPanel.add(titleLabel, BorderLayout.NORTH);
 
-        String[] colunas = {"ID", "Nome", "Destino", "Duração", "Preço", "Tipo"};
+        String[] colunas = {"ID", "Nome", "Destino", "Duração (dias)", "Preço (R$)", "Tipo"};
         model = new DefaultTableModel(colunas, 0) {
             @Override public boolean isCellEditable(int row, int column) { return false; }
         };
@@ -221,7 +221,7 @@ public class PacotesFrame extends JFrame {
         gbcLblDuracao.weightx = 0;
         gbcLblDuracao.anchor = GridBagConstraints.WEST;
         gbcLblDuracao.insets = new Insets(5, 5, 5, 5);
-        JLabel lblDuracao = new JLabel("Duração:");
+        JLabel lblDuracao = new JLabel("Duração (dias):");
         lblDuracao.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         formPanel.add(lblDuracao, gbcLblDuracao);
 
@@ -247,7 +247,7 @@ public class PacotesFrame extends JFrame {
         gbcLblPreco.weightx = 0;
         gbcLblPreco.anchor = GridBagConstraints.WEST;
         gbcLblPreco.insets = new Insets(5, 5, 5, 5);
-        JLabel lblPreco = new JLabel("Preço:");
+        JLabel lblPreco = new JLabel("Preço (R$):");
         lblPreco.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         formPanel.add(lblPreco, gbcLblPreco);
 
@@ -338,13 +338,11 @@ public class PacotesFrame extends JFrame {
             // Validação da duração (apenas números inteiros positivos)
             if (!duracao.matches("\\d+")) {
                 erros.append("- Duração deve ser um número\n");
-                erros.append("- Duração inválida\n");
             }
             
             // Validação do preço (número decimal positivo)
             if (!preco.matches("\\d+(\\.\\d{1,2})?")) {
                 erros.append("- Preço deve ser um valor numérico \n");
-                erros.append("- Preço inválido\n");
             }
             
             // Se houver erros, mostra todos de uma vez
@@ -361,7 +359,6 @@ public class PacotesFrame extends JFrame {
                 double precoDouble = Double.parseDouble(preco);
                 
                 if (isEdit) {
-                    // Atualiza pacote existente
                     pacote.setNome(nome);
                     pacote.setDestino(destino);
                     pacote.setDuracao(duracaoInt);
@@ -373,9 +370,8 @@ public class PacotesFrame extends JFrame {
                         "Sucesso", 
                         JOptionPane.INFORMATION_MESSAGE);
                 } else {
-                    // Cria novo pacote
                     PacoteViagem novoPacote = new PacoteViagem(
-                        0, // ID será gerado pelo controller
+                        0, // ID gerado pelo controller
                         nome,
                         destino,
                         duracaoInt,
