@@ -1,6 +1,7 @@
 package agencia.view;
 
 import agencia.controller.DadosController;
+import agencia.model.Cliente;
 import agencia.model.ServicoAdicional;
 import javax.swing.*;
 import javax.swing.border.*;
@@ -246,6 +247,8 @@ public class ServicosFrame extends JFrame {
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(dialog, "Preço deve ser um número válido.", "Erro de Formato", JOptionPane.ERROR_MESSAGE);
             }
+        	
+            
         });
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
