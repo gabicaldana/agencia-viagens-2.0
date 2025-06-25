@@ -309,7 +309,41 @@ public class PacotesFrame extends JFrame {
         ));
         
         btnSalvarDialogo.addActionListener(e -> {
-            // Lógica de validação e salvamento específica para o diálogo
+        	String nome = txtNome.getText().trim();
+            String destino = txtDestino.getText().trim();
+            String duracao = txtDuracao.getText().trim();
+            String preco = txtPreco.getText().trim();
+            StringBuilder erros = new StringBuilder();
+            
+          //validação todos são obrigatórios
+            if (nome.isEmpty() || destino.isEmpty() || duracao.isEmpty() || preco.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, "Todos os campos são obrigatórios.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+       //validação nome
+        	if (!nome.matches("[a-zA-Z ]+")) {
+                erros.append("- Use apenas letras no nome\n");
+            }
+        	
+        //validações destino
+        	if (!nome.matches("[a-zA-Z ]+")) {
+                erros.append("- Use apenas letras no destino\n");
+            }
+        	
+        //validações duração
+        	if (!duracao.matches("\\d+")) {
+                JOptionPane.showMessageDialog(dialog, "Duração deve conter apenas números.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        	
+        	//validações preço
+        	if (!preco.matches("\\d+")) {
+                JOptionPane.showMessageDialog(dialog, "Preço deve conter apenas números.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        	
+        	
         });
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
