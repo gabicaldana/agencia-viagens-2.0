@@ -309,41 +309,96 @@ public class PacotesFrame extends JFrame {
         ));
         
         btnSalvarDialogo.addActionListener(e -> {
-        	String nome = txtNome.getText().trim();
+            String nome = txtNome.getText().trim();
             String destino = txtDestino.getText().trim();
             String duracao = txtDuracao.getText().trim();
             String preco = txtPreco.getText().trim();
+            String tipo = (String) cbTipo.getSelectedItem();
             StringBuilder erros = new StringBuilder();
             
-          //validação todos são obrigatórios
+            // Validação de campos obrigatórios
             if (nome.isEmpty() || destino.isEmpty() || duracao.isEmpty() || preco.isEmpty()) {
-                JOptionPane.showMessageDialog(dialog, "Todos os campos são obrigatórios.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog, 
+                    "Todos os campos são obrigatórios.", 
+                    "Erro de Validação", 
+                    JOptionPane.ERROR_MESSAGE);
                 return;
             }
             
-       //validação nome
-        	if (!nome.matches("[a-zA-Z ]+")) {
-                erros.append("- Use apenas letras no nome\n");
+            // Validação do nome (apenas letras e espaços)
+            if (!nome.matches("[a-zA-ZÀ-ú ]+")) {
+                erros.append("- Nome deve conter apenas letras\n");
             }
-        	
-        //validações destino
-        	if (!nome.matches("[a-zA-Z ]+")) {
-                erros.append("- Use apenas letras no destino\n");
+            
+            // Validação do destino (apenas letras e espaços)
+            if (!destino.matches("[a-zA-ZÀ-ú ]+")) {
+                erros.append("- Destino deve conter apenas letras\n");
             }
-        	
-        //validações duração
-        	if (!duracao.matches("\\d+")) {
-                JOptionPane.showMessageDialog(dialog, "Duração deve conter apenas números.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+            
+            // Validação da duração (apenas números inteiros positivos)
+            if (!duracao.matches("\\d+")) {
+                erros.append("- Duração deve ser um número\n");
+                erros.append("- Duração inválida\n");
+            }
+            
+            // Validação do preço (número decimal positivo)
+            if (!preco.matches("\\d+(\\.\\d{1,2})?")) {
+                erros.append("- Preço deve ser um valor numérico \n");
+                erros.append("- Preço inválido\n");
+            }
+            
+            // Se houver erros, mostra todos de uma vez
+            if (erros.length() > 0) {
+                JOptionPane.showMessageDialog(dialog, 
+                    "Corrija os seguintes erros:\n" + erros.toString(), 
+                    "Erros de Validação", 
+                    JOptionPane.ERROR_MESSAGE);
                 return;
             }
-        	
-        	//validações preço
-        	if (!preco.matches("\\d+")) {
-                JOptionPane.showMessageDialog(dialog, "Preço deve conter apenas números.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
-                return;
+        
+            try {
+                int duracaoInt = Integer.parseInt(duracao);
+                double precoDouble = Double.parseDouble(preco);
+                
+                if (isEdit) {
+                    // Atualiza pacote existente
+                    pacote.setNome(nome);
+                    pacote.setDestino(destino);
+                    pacote.setDuracao(duracaoInt);
+                    pacote.setPreco(precoDouble);
+                    pacote.setTipo(tipo);
+                    controller.atualizarPacote(pacote);
+                    JOptionPane.showMessageDialog(dialog, 
+                        "Pacote atualizado com sucesso!", 
+                        "Sucesso", 
+                        JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    // Cria novo pacote
+                    PacoteViagem novoPacote = new PacoteViagem(
+                        0, // ID será gerado pelo controller
+                        nome,
+                        destino,
+                        duracaoInt,
+                        precoDouble,
+                        tipo
+                    );
+                    controller.salvarPacote(novoPacote);
+                    JOptionPane.showMessageDialog(dialog, 
+                        "Pacote cadastrado com sucesso!", 
+                        "Sucesso", 
+                        JOptionPane.INFORMATION_MESSAGE);
+                }
+                
+                atualizarTabela();
+                dialog.dispose();
+                
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(dialog,
+                    "Erro ao salvar pacote: " + ex.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
             }
-        	
-        	
         });
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
