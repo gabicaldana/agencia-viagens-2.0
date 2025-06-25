@@ -54,23 +54,29 @@ public class RelatoriosFrame extends JFrame {
         mainPanel.add(textPanel, BorderLayout.CENTER);
 
         // Painel de botões
-        JPanel botoesPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        JPanel botoesPanel = new JPanel(new GridLayout(2, 3, 10, 10));
         botoesPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
         botoesPanel.setBackground(new Color(0xf5f5f5));
         
         JButton btnResumo = criarBotaoEstilizado("Resumo Geral", new Color(0x2196f3));
         JButton btnVendas = criarBotaoEstilizado("Vendas por Data", new Color(0x4caf50));
         JButton btnPacotesPopulares = criarBotaoEstilizado("Pacotes Populares", new Color(0xff9800));
+        JButton btnPacotesPorCliente = criarBotaoEstilizado("Pacotes por Cliente", new Color(0x9c27b0));
+        JButton btnClientesPorPacote = criarBotaoEstilizado("Clientes por Pacote", new Color(0x009688));
         
         botoesPanel.add(btnResumo);
         botoesPanel.add(btnVendas);
         botoesPanel.add(btnPacotesPopulares);
+        botoesPanel.add(btnPacotesPorCliente);
+        botoesPanel.add(btnClientesPorPacote);
         
         mainPanel.add(botoesPanel, BorderLayout.SOUTH);
 
         btnResumo.addActionListener(e -> gerarResumoGeral());
         btnVendas.addActionListener(e -> gerarVendasPorData());
         btnPacotesPopulares.addActionListener(e -> gerarPacotesPopulares());
+        btnPacotesPorCliente.addActionListener(e -> selecionarClienteParaRelatorio());
+        btnClientesPorPacote.addActionListener(e -> selecionarPacoteParaRelatorio());
 
         setContentPane(mainPanel);
         pack();
@@ -146,6 +152,153 @@ public class RelatoriosFrame extends JFrame {
             sb.append(String.format("%-30s %d venda(s)\n", entry.getKey() + ":", entry.getValue()));
         }
 
+        textArea.setText(sb.toString());
+    }
+
+    private void selecionarClienteParaRelatorio() {
+        List<Cliente> clientes = controller.carregarClientes();
+        
+        if (clientes.isEmpty()) {
+            JOptionPane.showMessageDialog(this, 
+                "Não há clientes cadastrados.", 
+                "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        JComboBox<Cliente> clienteCombo = new JComboBox<>(clientes.toArray(new Cliente[0]));
+        clienteCombo.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof Cliente) {
+                    setText(((Cliente) value).getNome());
+                }
+                return this;
+            }
+        });
+        
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(new JLabel("Selecione um cliente:"), BorderLayout.NORTH);
+        panel.add(clienteCombo, BorderLayout.CENTER);
+        
+        int result = JOptionPane.showConfirmDialog(
+            this, 
+            panel, 
+            "Selecionar Cliente", 
+            JOptionPane.OK_CANCEL_OPTION, 
+            JOptionPane.PLAIN_MESSAGE
+        );
+        
+        if (result == JOptionPane.OK_OPTION) {
+            Cliente clienteSelecionado = (Cliente) clienteCombo.getSelectedItem();
+            gerarPacotesPorCliente(clienteSelecionado);
+        }
+    }
+
+    private void gerarPacotesPorCliente(Cliente cliente) {
+        List<Pedido> pedidos = controller.carregarPedidos();
+        Set<PacoteViagem> pacotes = new HashSet<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        
+        for (Pedido p : pedidos) {
+            if (p.getCliente().getId() == cliente.getId()) {
+                pacotes.addAll(p.getPacotes());
+            }
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("=== PACOTES CONTRATADOS POR ").append(cliente.getNome().toUpperCase()).append(" ===\n\n");
+        sb.append("Cliente: ").append(cliente.getNome()).append("\n");
+        sb.append("Documento: ").append(cliente.getDocumento()).append("\n");
+        sb.append("Email: ").append(cliente.getEmail()).append("\n");
+        sb.append("Telefone: ").append(cliente.getTelefone()).append("\n\n");
+        
+        if (pacotes.isEmpty()) {
+            sb.append("Nenhum pacote contratado por este cliente.\n");
+        } else {
+            sb.append("Pacotes contratados:\n");
+            for (PacoteViagem p : pacotes) {
+                sb.append(" - ").append(p.getNome()).append(" (").append(p.getDestino()).append(")\n");
+                sb.append("   Tipo: ").append(p.getTipo()).append("\n");
+                sb.append("   Duração: ").append(p.getDuracao()).append(" dias\n");
+                sb.append("   Preço: R$ ").append(String.format("%.2f", p.getPreco())).append("\n\n");
+            }
+        }
+        
+        textArea.setText(sb.toString());
+    }
+
+    private void selecionarPacoteParaRelatorio() {
+        List<PacoteViagem> pacotes = controller.carregarPacotes();
+        
+        if (pacotes.isEmpty()) {
+            JOptionPane.showMessageDialog(this, 
+                "Não há pacotes cadastrados.", 
+                "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        JComboBox<PacoteViagem> pacoteCombo = new JComboBox<>(pacotes.toArray(new PacoteViagem[0]));
+        pacoteCombo.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof PacoteViagem) {
+                    setText(((PacoteViagem) value).getNome());
+                }
+                return this;
+            }
+        });
+        
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(new JLabel("Selecione um pacote:"), BorderLayout.NORTH);
+        panel.add(pacoteCombo, BorderLayout.CENTER);
+        
+        int result = JOptionPane.showConfirmDialog(
+            this, 
+            panel, 
+            "Selecionar Pacote", 
+            JOptionPane.OK_CANCEL_OPTION, 
+            JOptionPane.PLAIN_MESSAGE
+        );
+        
+        if (result == JOptionPane.OK_OPTION) {
+            PacoteViagem pacoteSelecionado = (PacoteViagem) pacoteCombo.getSelectedItem();
+            gerarClientesPorPacote(pacoteSelecionado);
+        }
+    }
+
+    private void gerarClientesPorPacote(PacoteViagem pacote) {
+        List<Pedido> pedidos = controller.carregarPedidos();
+        Set<Cliente> clientes = new HashSet<>();
+        
+        for (Pedido p : pedidos) {
+            for (PacoteViagem pac : p.getPacotes()) {
+                if (pac.getId() == pacote.getId()) {
+                    clientes.add(p.getCliente());
+                }
+            }
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("=== CLIENTES QUE CONTRATARAM ").append(pacote.getNome().toUpperCase()).append(" ===\n\n");
+        sb.append("Pacote: ").append(pacote.getNome()).append("\n");
+        sb.append("Destino: ").append(pacote.getDestino()).append("\n");
+        sb.append("Tipo: ").append(pacote.getTipo()).append("\n");
+        sb.append("Duração: ").append(pacote.getDuracao()).append(" dias\n");
+        sb.append("Preço: R$ ").append(String.format("%.2f", pacote.getPreco())).append("\n\n");
+        
+        if (clientes.isEmpty()) {
+            sb.append("Nenhum cliente contratou este pacote.\n");
+        } else {
+            sb.append("Clientes que contrataram este pacote:\n");
+            for (Cliente c : clientes) {
+                sb.append(" - ").append(c.getNome()).append(" (").append(c.getDocumento()).append(")\n");
+                sb.append("   Email: ").append(c.getEmail()).append("\n");
+                sb.append("   Telefone: ").append(c.getTelefone()).append("\n\n");
+            }
+        }
+        
         textArea.setText(sb.toString());
     }
 }
